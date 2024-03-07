@@ -20,9 +20,23 @@ public class ServiceValidateEndpoint extends ValidateEndpoint {
 
     @Override
     protected Response successResponse() {
+        String username = null;
+        String usernameAttribute = "TEST_ATTR";
         UserSessionModel userSession = clientSession.getUserSession();
+        UserModel user = userSession.getUser();
         Map<String, Object> attributes = getUserAttributes();
-        CASServiceResponse serviceResponse = ServiceResponseHelper.createSuccess(userSession.getUser().getUsername(), attributes);
+//        CASServiceResponse serviceResponse = ServiceResponseHelper.createSuccess(userSession.getUser().getUsername(), attributes);
+        try {
+          username = user.getFirstAttribute(usernameAttribute);
+
+          if (username == null || username.isEmpty()) {
+            username = user.getUsername();
+          }
+        } catch (Exception ex) {
+          username =  user.getUsername();
+        }
+
+        CASServiceResponse serviceResponse = ServiceResponseHelper.createSuccess(username, attributes);
         return prepare(Response.Status.OK, serviceResponse);
     }
 
