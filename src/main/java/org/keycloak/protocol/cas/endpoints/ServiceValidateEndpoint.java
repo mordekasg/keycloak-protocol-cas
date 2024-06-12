@@ -21,7 +21,7 @@ public class ServiceValidateEndpoint extends ValidateEndpoint {
     @Override
     protected Response successResponse() {
         String username = null;
-        String usernameAttribute = "TEST_ATTR";
+        String usernameAttribute = "sAMAccountName";
         UserSessionModel userSession = clientSession.getUserSession();
         UserModel user = userSession.getUser();
         Map<String, Object> attributes = getUserAttributes();
