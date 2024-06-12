@@ -37,6 +37,9 @@ public class SamlValidateEndpoint extends AbstractValidateEndpoint {
     @Produces("text/xml;charset=utf-8")
     public Response validate(String input) {
         MultivaluedMap<String, String> queryParams = session.getContext().getUri().getQueryParameters();
+        String username = null;
+        String usernameAttribute = "sAMAccountName";
+
         try {
             String soapAction = Optional.ofNullable(session.getContext().getRequestHeaders().getHeaderString("SOAPAction")).map(s -> s.trim().replace("\"", "")).orElse("");
             if (!soapAction.equals("http://www.oasis-open.org/committees/security")) {
@@ -57,7 +60,18 @@ public class SamlValidateEndpoint extends AbstractValidateEndpoint {
 
             Map<String, Object> attributes = getUserAttributes();
 
-            SAML11ResponseType response = SamlResponseHelper.successResponse(issuer, user.getUsername(), attributes);
+            try {
+              username = user.getFirstAttribute(usernameAttribute);
+
+              if (username == null || username.isEmpty()) {
+                username = user.getUsername();
+              }
+            } catch (Exception ex) {
+              username =  user.getUsername();
+            }
+
+//            SAML11ResponseType response = SamlResponseHelper.successResponse(issuer, user.getUsername(), attributes);
+            SAML11ResponseType response = SamlResponseHelper.successResponse(issuer, username, attributes);
 
             return Response.ok(SamlResponseHelper.soap(response)).build();
 
